@@ -6,15 +6,15 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 ## Evaluations
 
 | Benchmark score | Bamba 9.8B 2.2T | NVIDIA Mamba2 Hybrid 8B 3.5T | Olmo1.5 7B 2T |
-|----------|----------|----------|-------|
-| MMLU |  <span style="color:green">59.2</span>  |    53.6 |     52  |
-| Hellaswag | **80.0** |  77.69  |  75.5 |
-|   Winogrande | **73.6** | 71.27 | 69.8 |
-| SocialIQA | 52.4 | n/a | n/a |
-| Piqa | **81.77** | 79.65 | 77.5 |
-| OpenbookQA | 48 | 42.8 | **50** |
-| ARC-C | **56.1** | 47.7 | 42.5 |
-| TruthfulQA | **49.1** | 38.72 | 35.8 |
+|-----------------|------------------|-----------------------------|----------------|
+| MMLU           | _59.2_          | 53.6                        | 52             |
+| Hellaswag      | _80.0_          | 77.69                       | 75.5           |
+| Winogrande     | _73.6_          | 71.27                       | 69.8           |
+| SocialIQA      | 52.4         | n/a                         | n/a            |
+| Piqa           | _81.77_         | 79.65                       | 77.5           |
+| OpenbookQA     | 48              | 42.8                        | _50.0_         |
+| ARC-C          | _56.1_          | 47.7                        | 42.5           |
+| TruthfulQA     | _49.1_          | 38.72                       | 35.8           |
 
 
 ## Training
