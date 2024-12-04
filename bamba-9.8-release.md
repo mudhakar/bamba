@@ -6,7 +6,7 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 ## Evaluations
 
 Bamba outperforms similar sized Hybrid Mamba model from NVIDIA and outperforms the Olmo model trained on the same data. 
-| Benchmark score | Bamba 9.8B 2.2T | NVIDIA Mamba2 Hybrid 8B 3.5T | Olmo1.5 7B 2T |
+| Benchmark score | Bamba 9B | NVIDIA Mamba2 Hybrid 8B | Olmo1.5 7B |
 |-----------------|------------------|-----------------------------|----------------|
 | MMLU (5-shot)        | _59.2_          | 53.6                        | 52             |
 | Hellaswag      | _80.0_          | 77.69                       | 75.5           |
@@ -18,7 +18,7 @@ Bamba outperforms similar sized Hybrid Mamba model from NVIDIA and outperforms t
 | TruthfulQA     | _49.1_          | 38.72                       | 35.8           |
 
 
-| Benchmark score | Bamba 9.8B 2.2T | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
+| Benchmark score | Bamba 9B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|------------------|------------------|------------------|----------|
 | MMLU           | 59.2            | _66.7_           | 65.54           | 63.7     |
 | MMLU PRO       |                 | _37.1_           | 33.27           | 31       |
