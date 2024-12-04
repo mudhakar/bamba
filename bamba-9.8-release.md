@@ -5,9 +5,10 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 
 ## Evaluations
 
+Bamba outperforms similar sized Hybrid Mamba model from NVIDIA and outperforms the Olmo model trained on the same data. 
 | Benchmark score | Bamba 9.8B 2.2T | NVIDIA Mamba2 Hybrid 8B 3.5T | Olmo1.5 7B 2T |
 |-----------------|------------------|-----------------------------|----------------|
-| MMLU           | _59.2_          | 53.6                        | 52             |
+| MMLU (5-shot)        | _59.2_          | 53.6                        | 52             |
 | Hellaswag      | _80.0_          | 77.69                       | 75.5           |
 | Winogrande     | _73.6_          | 71.27                       | 69.8           |
 | SocialIQA      | 52.4         | n/a                         | n/a            |
@@ -17,6 +18,22 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 | TruthfulQA     | _49.1_          | 38.72                       | 35.8           |
 
 
-## Training
+| Benchmark score | Bamba 9.8B 2.2T | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
+|-----------------|------------------|------------------|------------------|----------|
+| MMLU           | 59.2            | _66.7_           | 65.54           | 63.7     |
+| MMLU PRO       |                 | _37.1_           | 33.27           | 31       |
+| AGIEval        |                 | 47.8            | 34.45           | _50.4_   |
+| Hellaswag      | 80              |                  | 83.61           | _83.8_   |
+| Winogrande     | 73.6            | 60.5            | _80.9_          | 77.2     |
+| SocialIQA      | 52.35           | 49.5            | _67.8_          |          |
+| Piqa           | 81.77           | 81              | _82.32_         |          |
+| OpenbookQA     | 48              | 45              | _46.8_          |          |
+| ARC-C          | 56.1            | 79.7            | 63.4            | _79.8_   |
+| TruthfulQA     | 49.1            |                  | _52.89_         |          |
+
+
+
+
+
 
 ## 
