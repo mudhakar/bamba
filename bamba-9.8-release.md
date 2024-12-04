@@ -5,18 +5,20 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 
 ## Evaluations
 
-Bamba outperforms similar sized Hybrid Mamba model from NVIDIA and outperforms the Olmo model trained on the same data. 
-| Benchmark score | Bamba 9B | NVIDIA Mamba2 Hybrid 8B | Olmo1.5 7B |
-|-----------------|------------------|-----------------------------|----------------|
-| MMLU (5-shot)        | _59.2_          | 53.6                        | 52             |
-| Hellaswag      | _80.0_          | 77.69                       | 75.5           |
-| Winogrande     | _73.6_          | 71.27                       | 69.8           |
-| SocialIQA      | 52.4         | n/a                         | n/a            |
-| Piqa           | _81.77_         | 79.65                       | 77.5           |
-| OpenbookQA     | 48              | 42.8                        | _50.0_         |
-| ARC-C          | _56.1_          | 47.7                        | 42.5           |
-| TruthfulQA     | _49.1_          | 38.72                       | 35.8           |
+Bamba outperforms similar sized Hybrid Mamba model from NVIDIA, outperforms the Olmo pure transformer model trained on the same data and Meta Llama2 7B, IBM Granite 7B trained to similar number of tokens.
 
+| Benchmark score | Bamba 9B | NVIDIA Mamba2 Hybrid 8B | Olmo1.5 7B | Meta Llama2 7B | IBM Granite 7B |
+|-----------------|----------|-------------------------|------------|----------------|----------------|
+| MMLU (5-shot)   | _59.2_   | 53.6                   | 52         | 47             | 50             |
+| Hellaswag       | _80.0_   | 77.69                  | 75.5       | 76             | 74             |
+| Winogrande      | _73.6_   | 71.27                  | 69.8       | 69.0           | 67             |
+| Piqa            | _81.77_  | 79.65                  | 77.5       | 79             | 79             |
+| OpenbookQA      | 48       | 42.8                   | _50.0_     | 44             | 42             |
+| ARC-C           | _56.1_   | 47.7                   | 42.5       | 46             | 44             |
+| TruthfulQA      | _49.1_   | 38.72                  | 35.8       | 39             | 39             |
+
+
+We also compare the model with SoTA OSS models of the same size and there are obvious benchmark gaps. However, we note that architecturally the changes are minimal (e.g., Meta Llama changed from MHA to GQA, IBM Granite v3 added `mup`), but the data quality has significantly improved resulting in better scores. We plan to incorporate the improved data in our future iterations of Bamba to further close the gap with SoTA OSS models.
 
 | Benchmark score | Bamba 9B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|------------------|------------------|------------------|----------|
@@ -31,9 +33,33 @@ Bamba outperforms similar sized Hybrid Mamba model from NVIDIA and outperforms t
 | ARC-C          | 56.1            | 79.7            | 63.4            | _79.8_   |
 | TruthfulQA     | 49.1            |                  | _52.89_         |          |
 
+While these results are promising, we invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
+
+## Inference efficiency
 
 
+## Model architecture
+We base our model architecture on the NVIDIA Hybrid Mamba2 with the following changes.
+| Parameter | Bamba 9B | NVIDIA Hybrid Mamba2 8B |
+|---------|-------|-------|
+| Num layers | 32 | 29 |
+| Num Mamba2 layers | 3 | 4 |
+| MLP expansion factor | 3.5 | 4 |
+| Vocab size | 128k | 256k |
+| Non-embedding parameters | 8.8B | 8.6B |
+| RoPE | yes | no |
+| Gated linear units | yes | no |
 
+We have a total of 8B parameters in the Mamba2 layers, 800M in full attention layers, and 1B in embeddings. The hidden state is 4K, GQA for full attention with 8 KV-heads and 32 heads, Mamba2 layer head dimension is 64, and convolution filter size is 4.
 
+## Training
+Pre-training Bamba was done in a phased manner, we performed ablation experiments at 1.8B model size and a few 100B tokens to determine the right learning rates and built on the previous community efforts - significant hyperparamters were borrowed from the Mamba2 paper and repository. Based on the promising results from this study, we scaled the model to 3B and 2T tokens using Dolma mix. We also trained a 3B transformer model following Meta Llama architecture with the same data mix and observed similar or better performance from the Bamba model.
 
-## 
+Finally, we scaled the model to 9B size and leveraged PyTorch FSDP to train the model. The data mix used is illustrated in the below figure (details of how to run are in the associated GitHub repo).
+
+<img src="https://github.com/user-attachments/assets/0bc03608-fc3d-4886-b746-9839c52261d5" alt="Datamix" width="600" height="400">
+
+We had no major challenges in training 
+
+## Artifacts
+
