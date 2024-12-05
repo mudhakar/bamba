@@ -10,6 +10,14 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 
 ## Evaluations
 
+We break our evaluations into three parts:
+1. Comparison with SoTA hybrid model of similar size as well as generic transformer models of similar size and number of tokens.
+2. Comparison with SoTA transformer models of similar size.
+3. Controlled ablation with transformer
+
+TL;DR
+We find that Bamba9B outperforms other similar sized Hybrid models and transformer models trained to the same number of tokens by 5-6 points on average across 8 key benchmarks. 
+### Comparison with
 Bamba outperforms similar sized Hybrid Mamba model from NVIDIA, outperforms the Olmo pure transformer model trained on the same data and Meta Llama2 7B, IBM Granite 7B trained to similar number of tokens.
 
 | Benchmark score | Bamba 9B | NVIDIA Mamba2 Hybrid 8B | Olmo1.5 7B | Meta Llama2 7B | IBM Granite 7B |
@@ -21,6 +29,7 @@ Bamba outperforms similar sized Hybrid Mamba model from NVIDIA, outperforms the 
 | OpenbookQA      | 48       | 42.8                   | _50.0_     | 44             | 42             |
 | ARC-C           | _56.1_   | 47.7                   | 42.5       | 46             | 44             |
 | TruthfulQA      | _49.1_   | 38.72                  | 35.8       | 39             | 39             |
+| **Average**     | _64.54_    | 58.49                  | 57.30      | 57.14          | 56.43          |
 
 
 We also compare the model with SoTA OSS models of the same size and there are obvious benchmark gaps. However, we note that architecturally the changes are minimal (e.g., Meta Llama changed from MHA to GQA, IBM Granite v3 added `mup`), but the data quality has significantly improved resulting in better scores. We plan to incorporate the improved data in our future iterations of Bamba to further close the gap with SoTA OSS models.
@@ -32,11 +41,11 @@ We also compare the model with SoTA OSS models of the same size and there are ob
 | AGIEval        |                 | 47.8            | 34.45           | _50.4_   |
 | Hellaswag      | 80              |                  | 83.61           | _83.8_   |
 | Winogrande     | 73.6            | 60.5            | _80.9_          | 77.2     |
-| SocialIQA      | 52.35           | 49.5            | _67.8_          |          |
-| Piqa           | 81.77           | 81              | _82.32_         |          |
-| OpenbookQA     | 48              | 45              | _46.8_          |          |
+| SocialIQA      | 52.35           | 49.5            | _67.8_          |   51.33*       |
+| Piqa           | 81.77           | 81              | _82.32_         |    81.07*      |
+| OpenbookQA     | 48              | 45              | _46.8_          |    46.2*      |
 | ARC-C          | 56.1            | 79.7            | 63.4            | _79.8_   |
-| TruthfulQA     | 49.1            |                  | _52.89_         |          |
+| TruthfulQA     | 49.1            |                  | _52.89_         |    43.32*      |
 
 While these results are promising, we invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
 
