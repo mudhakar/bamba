@@ -1,4 +1,4 @@
-# Announcing Bamba -- Reduce Inference Latencies
+# Announcing Bamba
 
 <div style="text-align: center;">
   <img src="https://github.com/foundation-model-stack/bamba/blob/main/bamba.jpeg" alt="Bamba" width="400" height="400">
@@ -16,7 +16,7 @@ We break our evaluations into three parts:
 3. Controlled ablation with transformer
 
 TL;DR
-We find that Bamba9B outperforms other similar sized Hybrid models and transformer models trained to the same number of tokens by 5-6 points on average across 8 key benchmarks. 
+We find that Bamba9B outperforms other similar sized Hybrid models and transformer models trained to the same number of tokens by 5-6 points on average across 8 key benchmarks. However, on the SoTA models such as 
 ### Comparison with
 Bamba outperforms similar sized Hybrid Mamba model from NVIDIA, outperforms the Olmo pure transformer model trained on the same data and Meta Llama2 7B, IBM Granite 7B trained to similar number of tokens.
 
