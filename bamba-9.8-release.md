@@ -15,41 +15,42 @@ We break our evaluations into three parts:
 2. Comparison with transformers trained to similar tokens
 3. Comparison with SoTA transformer models of similar size
 
-We use a local copy of the [Open LLM leaderboard](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for our benchmarks and rerun all the Hugging Face transformers format compatible models to get the evaluation scores (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format).
+We use a local copy of the [Open LLM leaderboard](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for our benchmarks, whereas for other models, we use the output from the Live leaderboard (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format, hence we report the numbers from the paper).
 
 TL;DR
 We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, we observe that we are on parity on various tasks and we believe that for those that we have gaps, it is due to lack of quality training data. We plan to continue training the current versions with newer datasets like Olmo2 mix and SFT datasets such as Tuluv3, agent instruct, and Anteater.
 
 ### Comparison with Hybrid Architectures
-Several Mamba based architecture models have started coming up in the last 6months (e.g., NVIDIA Hybrid Mamba2, Codestral Mamba, Falcon Mamba, Zamba7Bv1) furthering the performance of these architectures and demonstrating their inference performance as well as closing the gap with quality. We compare 8 key benchmarks across Bamba, NVIDIA Hybrid model, Zamba, and Falcon and show that the Bamba model performs comparatively to these 
+Several Mamba based architecture models have started coming up in the last 6months (e.g., NVIDIA Hybrid Mamba2, Codestral Mamba, Falcon Mamba, Zamba7Bv1) furthering the performance of these architectures and demonstrating their inference performance as well as closing the gap with quality. We compare 8 key benchmarks across Bamba, NVIDIA Hybrid model, Zamba, and Falcon Mamba. Falcon Mamba is a pure Mamba model, Zamba has shared attention layer for every 6 Mamba layers, and Bamba and NVIDIA are both Hybrid models with full attention layers interspersed with Mamba layer. While Falcon Mamba performs the best overall and has been trained to 5.5T tokens, there are open questions on how well copying tasks work on such pure Mamba models. Zamba was trained on fewer tokens (1T), but with a different Hybrid architecture. Bamba and NVIDIA Mamba are quite similar to each other (details on differences are summarized in the model architecture section), but Bamba is trained to 2.2T and NVIDIA Hybrid Mamba is trained to 3.5T tokens. The key point is that even with all these architectural variations and different number of tokens, Mamba based models are demonstrating competitive results. We are continuing to train the Bamba model with latest datasets and plan to release future checkpoints as the model gets better.
 
 | Benchmark score   | Bamba 9B   | NVIDIA Mamba2 Hybrid 8B | Zamba 7B   | Falcon Mamba 7B   |
 |-------------------|------------|-------------------------|------------|-------------------|
-| MMLU (5-shot)     | 60.77      | 53.6                   | 57.85      | 63.19           |
-| Hellaswag         | 81.8       | 77.69                  | 82.27    | 80.82             |
-| Winogrande        | 76.87      | 71.27                  | 79.32    | 78.14             |
-| Piqa              | 82.26      | 79.65                  | 82.21      | 83.62           |
-| OpenbookQA        | 47.6       | 42.8                   | 46.8       | 47.8            |
-| ARC-C             | 63.23      | 47.7                   | 55.38      | 63.4            |
-| TruthfulQA        | 49.21      | 38.72                  | 49.69      | 53.46           |
-| **Average**       | 65.96      | 58.78                  | 64.79      | 67.2              |
+| MMLU (5-shot)     | 60.77      | 53.6                   | 57.85      | **63.19**         |
+| Hellaswag         | 81.8       | 77.69                  | **82.27**  | 80.82             |
+| Winogrande        | 76.87      | 71.27                  | **79.32**  | 78.14             |
+| Piqa              | 82.26      | 79.65                  | 82.21      | **83.62**         |
+| OpenbookQA        | 47.6       | 42.8                   | 46.8       | **47.8**          |
+| ARC-C             | 63.23      | 47.7                   | 55.38      | **63.4**          |
+| TruthfulQA        | 49.21      | 38.72                  | 49.69      | **53.46**         |
+| **Average**       | 65.96      | 58.78                  | 64.79      | **67.2**          |
 
 ## Comparison with transformers with similar token budget
-We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta Llama2 7B (2023), and IBM Granite 7B (2023), which have been trained to 2T tokens. While Olmo 7B outperforms Meta Llama2 and IBM Granite models across these 8 benchmarks, we note that with the same dataset, Bamba outperforms Olmo 7B. The key takeaway is that the Bamba model does well on the same dataset and similar token budget transformer models.
+We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta Llama2 7B (2023), and IBM Granite 7B (2023), which have been trained to 2T tokens. While Olmo 7B outperforms Meta Llama2 and IBM Granite models across these 8 benchmarks, we note that with the same dataset, Bamba outperforms Olmo 7B. The main takeaway is that the Bamba model does well on the same dataset and similar token budget transformer models.
 
 | Benchmark score   | Bamba 9B   | Olmo1.5 7B   | Meta Llama2 7B   | IBM Granite 7B   |
 |-------------------|------------|--------------|------------------|------------------|
-| MMLU (5-shot)     | 60.77      | 53.39        | 46.87            | 49.02            |
-| Hellaswag         | 81.8       | 78.65        | 78.59            | 77.0             |
-| Winogrande        | 76.87      | 72.77        | 74.03            | 70.17            |
-| Piqa              | 82.26      | 78.4         | 79.0             | 80.14            |
-| OpenbookQA        | 47.6       | 50.2         | 44.0             | 40.8             |
-| ARC-C             | 63.23      | 48.5         | 53.07            | 49.91            |
-| TruthfulQA        | 49.21      | 36.0         | 38.76            | 38.7             |
-| **Average**       | 65.96      | 59.7         | 59.19            | 57.96            |
+| MMLU (5-shot)     | **60.77**  | 53.39        | 46.87            | 49.02            |
+| Hellaswag         | **81.8**   | 78.65        | 78.59            | 77.0             |
+| Winogrande        | **76.87**  | 72.77        | 74.03            | 70.17            |
+| Piqa              | **82.26**  | 78.4         | 79.0             | 80.14            |
+| OpenbookQA        | 47.6       | **50.2**     | 44.0             | 40.8             |
+| ARC-C             | **63.23**  | 48.5         | 53.07            | 49.91            |
+| TruthfulQA        | **49.21**  | 36.0         | 38.76            | 38.7             |
+| **Average**       | **65.96**  | 59.7         | 59.19            | 57.96            |
 
 ### Comparison with SoTA transformer models
 
+Finally, we compare with 
 We also compare the model with SoTA OSS models of the same size and there are obvious benchmark gaps. However, we note that architecturally the changes are minimal (e.g., Meta Llama changed from MHA to GQA, IBM Granite v3 added `mup`), but the data quality has significantly improved resulting in better scores. We plan to incorporate the improved data in our future iterations of Bamba to further close the gap with SoTA OSS models.
 
 | Benchmark score | Bamba 9B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
