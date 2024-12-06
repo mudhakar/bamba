@@ -11,41 +11,59 @@ We introduce Bamba, another proof point that improves on the existing SoTA Mamba
 ## Evaluations
 
 We break our evaluations into three parts:
-1. Comparison with SoTA hybrid model of similar size as well as generic transformer models of similar size and number of tokens.
-2. Comparison with SoTA transformer models of similar size.
-3. Controlled ablation with transformer
+1. Comparison with Mamba architecture based lnaguage models
+2. Comparison with transformers trained to similar tokens
+3. Comparison with SoTA transformer models of similar size
+
+We use a local copy of the [Open LLM leaderboard](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for our benchmarks and rerun all the Hugging Face transformers format compatible models to get the evaluation scores (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format).
 
 TL;DR
-We find that Bamba9B outperforms other similar sized Hybrid models and transformer models trained to the same number of tokens by 5-6 points on average across 8 key benchmarks. However, on the SoTA models such as 
-### Comparison with
-Bamba outperforms similar sized Hybrid Mamba model from NVIDIA, outperforms the Olmo pure transformer model trained on the same data and Meta Llama2 7B, IBM Granite 7B trained to similar number of tokens.
+We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, we observe that we are on parity on various tasks and we believe that for those that we have gaps, it is due to lack of quality training data. We plan to continue training the current versions with newer datasets like Olmo2 mix and SFT datasets such as Tuluv3, agent instruct, and Anteater.
 
-| Benchmark score | Bamba 9B | NVIDIA Mamba2 Hybrid 8B | Olmo1.5 7B | Meta Llama2 7B | IBM Granite 7B |
-|-----------------|----------|-------------------------|------------|----------------|----------------|
-| MMLU (5-shot)   | _59.2_   | 53.6                   | 52         | 47             | 50             |
-| Hellaswag       | _80.0_   | 77.69                  | 75.5       | 76             | 74             |
-| Winogrande      | _73.6_   | 71.27                  | 69.8       | 69.0           | 67             |
-| Piqa            | _81.77_  | 79.65                  | 77.5       | 79             | 79             |
-| OpenbookQA      | 48       | 42.8                   | _50.0_     | 44             | 42             |
-| ARC-C           | _56.1_   | 47.7                   | 42.5       | 46             | 44             |
-| TruthfulQA      | _49.1_   | 38.72                  | 35.8       | 39             | 39             |
-| **Average**     | _64.54_    | 58.49                  | 57.30      | 57.14          | 56.43          |
+### Comparison with Hybrid Architectures
+Several Mamba based architecture models have started coming up in the last 6months (e.g., NVIDIA Hybrid Mamba2, Codestral Mamba, Falcon Mamba, Zamba7Bv1) furthering the performance of these architectures and demonstrating their inference performance as well as closing the gap with quality. We compare 8 key benchmarks across Bamba, NVIDIA Hybrid model, Zamba, and Falcon and show that the Bamba model performs comparatively to these 
 
+| Benchmark score   | Bamba 9B   | NVIDIA Mamba2 Hybrid 8B | Zamba 7B   | Falcon Mamba 7B   |
+|-------------------|------------|-------------------------|------------|-------------------|
+| MMLU (5-shot)     | 60.77      | 53.6                   | 57.85      | 63.19           |
+| Hellaswag         | 81.8       | 77.69                  | 82.27    | 80.82             |
+| Winogrande        | 76.87      | 71.27                  | 79.32    | 78.14             |
+| Piqa              | 82.26      | 79.65                  | 82.21      | 83.62           |
+| OpenbookQA        | 47.6       | 42.8                   | 46.8       | 47.8            |
+| ARC-C             | 63.23      | 47.7                   | 55.38      | 63.4            |
+| TruthfulQA        | 49.21      | 38.72                  | 49.69      | 53.46           |
+| **Average**       | 65.96      | 58.78                  | 64.79      | 67.2              |
+
+## Comparison with transformers with similar token budget
+We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta Llama2 7B (2023), and IBM Granite 7B (2023), which have been trained to 2T tokens. While Olmo 7B outperforms Meta Llama2 and IBM Granite models across these 8 benchmarks, we note that with the same dataset, Bamba outperforms Olmo 7B. The key takeaway is that the Bamba model does well on the same dataset and similar token budget transformer models.
+
+| Benchmark score   | Bamba 9B   | Olmo1.5 7B   | Meta Llama2 7B   | IBM Granite 7B   |
+|-------------------|------------|--------------|------------------|------------------|
+| MMLU (5-shot)     | 60.77      | 53.39        | 46.87            | 49.02            |
+| Hellaswag         | 81.8       | 78.65        | 78.59            | 77.0             |
+| Winogrande        | 76.87      | 72.77        | 74.03            | 70.17            |
+| Piqa              | 82.26      | 78.4         | 79.0             | 80.14            |
+| OpenbookQA        | 47.6       | 50.2         | 44.0             | 40.8             |
+| ARC-C             | 63.23      | 48.5         | 53.07            | 49.91            |
+| TruthfulQA        | 49.21      | 36.0         | 38.76            | 38.7             |
+| **Average**       | 65.96      | 59.7         | 59.19            | 57.96            |
+
+### Comparison with SoTA transformer models
 
 We also compare the model with SoTA OSS models of the same size and there are obvious benchmark gaps. However, we note that architecturally the changes are minimal (e.g., Meta Llama changed from MHA to GQA, IBM Granite v3 added `mup`), but the data quality has significantly improved resulting in better scores. We plan to incorporate the improved data in our future iterations of Bamba to further close the gap with SoTA OSS models.
 
 | Benchmark score | Bamba 9B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|------------------|------------------|------------------|----------|
-| MMLU           | 59.2            | _66.7_           | 65.54           | 63.7     |
-| MMLU PRO       |                 | _37.1_           | 33.27           | 31       |
-| AGIEval        |                 | 47.8            | 34.45           | _50.4_   |
-| Hellaswag      | 80              |                  | 83.61           | _83.8_   |
-| Winogrande     | 73.6            | 60.5            | _80.9_          | 77.2     |
+| MMLU           | 60.77            | 66.7           | 65.54           | 63.7     |
+| MMLU PRO       |      25.77           | _37.1_           | 33.27           | 31       |
+| BBH        |      40.16           | 47.8            | 34.45           | _50.4_   |
+| Hellaswag      | 81.8              |                  | 83.61           | _83.8_   |
+| Winogrande     | 76.87            | 60.5            | _80.9_          | 77.2     |
 | SocialIQA      | 52.35           | 49.5            | _67.8_          |   51.33*       |
-| Piqa           | 81.77           | 81              | _82.32_         |    81.07*      |
-| OpenbookQA     | 48              | 45              | _46.8_          |    46.2*      |
-| ARC-C          | 56.1            | 79.7            | 63.4            | _79.8_   |
-| TruthfulQA     | 49.1            |                  | _52.89_         |    43.32*      |
+| Piqa           | 82.26           | 81              | _82.32_         |    81.07*      |
+| OpenbookQA     | 47.6              | 45              | _46.8_          |    46.2*      |
+| ARC-C          | 63.23            | 79.7            | 63.4            | _79.8_   |
+| TruthfulQA     | 49.21            |                  | _52.89_         |    43.32*      |
 
 While these results are promising, we invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
 
