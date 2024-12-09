@@ -50,28 +50,32 @@ We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta L
 
 ### Comparison with SoTA transformer models
 
-Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite v3 8B, and Olmo2 7B). For the missing results in HF leaderboard, we rerun these (marked with a *). We observe that there are obvious benchmark gaps, but note that the Bamba and Falcon Mamba models are closing these benchmark gaps. We believe that with the right data (note that the latest transformer models have been trained on data from the last six months, before we trained our model), these gaps can be closed. For example, we had one small scale run that added `metamath` and improved our `GSM8k` score from `36.77` to `60.0`. We are continuing to train this model with latest datasets such as the one released by the AllenAI team - [Olmo2 mix](), [Dolmino mix](), and [TuluV3]().
+Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite v3 8B, and Olmo2 7B). For the missing results in HF leaderboard, we rerun these (marked with a *). We observe that there are obvious benchmark gaps, but note that the Bamba and Falcon Mamba models are closing these benchmark gaps. We believe that with the right data (note that the latest transformer models have been trained on data from the last six months, before we trained our model), these gaps can be closed. For example, we had one small scale run that added `metamath` and improved our `GSM8k` score from `36.77` to `60.0`. We are continuing to train this model with latest datasets such as the one released by the AllenAI team - [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124), [Dolmino mix](https://huggingface.co/datasets/allenai/dolmino-mix-1124), and [TuluV3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture).
 
 
-| Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
-|-----------------|------------------|------------------|------------------|----------|----------|
-| MMLU           | 60.77            | 63.19 | 66.7           | 65.54           | 63.7     |
-| MMLU PRO       |      17.53       | 14.33    | 25.46           | 25.83           |        |
-| BBH        |      17.40           | 19.88  |25.16            | 28.02           |    |
-| Hellaswag      | 81.8             | 80.82  |                  | 83.61           | _83.8_   |
-| Winogrande     | 76.87            | 78.14 | 60.5            | _80.9_          | 77.2     |
-| Piqa           | 82.26           | 83.62 | 81              | _82.32_         |    81.07*      |
-| OpenbookQA     | 47.6            | 47.8  | 45              | _46.8_          |    46.2*      |
-| ARC-C          | 63.23           | 63.4 | 79.7            | 63.4            | _79.8_   |
-| TruthfulQA     | 49.21            | 53.46 |                  | _52.89_         |    43.32*      |
-| MuSR | 9.59 | 9.88 | 8.72 | 9.32 | |
-| GSM8K | 36.77 | 52.08 | | 62.55 | |
-| GPQA | 4.14 | 8.17 | 8.61 | 9.06 | |
+| Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B* |
+|-----------------|----------|------------------|-------------------|-------------------|-----------|
+| MMLU           | 60.77    | 63.19           | **66.70**         | 65.54             | 63.96     |
+| MMLU PRO       | 17.53    | 14.33           | 25.46             | **25.83**         | 22.79     |
+| BBH            | 17.40    | 19.88           | 25.16             | **28.02**         | 21.69     |
+| Hellaswag      | 81.80    | 80.82           | 81.98             | **83.61**         | 81.93     |
+| Winogrande     | 76.87    | 78.14           | 77.51             | **80.90**         | 77.03     |
+| Piqa           | 82.26    | **83.62**       | 82.54             | 82.32             | 81.39     |
+| OpenbookQA     | 47.60    | 47.80           | 46.80             | 46.80             | **49.20** |
+| ARC-C          | 63.23    | 63.40           | 57.85             | 63.40             | **64.51** |
+| TruthfulQA     | 49.21    | **53.46**       | 45.16             | 52.89             | 43.32     |
+| MuSR           | 9.59     | 9.88            | 8.72              | 9.32              | **10.02** |
+| GSM8K          | 36.77    | 52.08           | 49.96             | 62.55             | **68.01** |
+| GPQA           | 4.14     | 8.17            | 8.61              | **9.06**          | 4.92      |
+| **Average**    | 47.92    | 50.09           | 48.61             | **56.77**         | 54.89     |
+
 
 We invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
 
 ## Inference efficiency
+The **KV-cache bottleneck** is the biggest challenge for Large language models and the community has furiously pursued addressing this issue through different approaches - quantization, pruning for standard transformers and of course novel model architectures such as Mamba2, Linear transformers, and Retnets. Realizing inference gains at production time is non-trivial even for changes to standard transformers - typically needing custom kernels that scale with the problem size. One key reason to pursue Mamba2 architecture is to build on the momentum of availability of kernels in the community. This effort furthers the progress by fixing issues in the core Mamba2 kernels via the popular vLLM model serving framework.
 
+Our current progression of integration into vLLM can be tracked via [this PR](). We use benchmark the inference latency 
 
 ## Model architecture
 We base our model architecture on the NVIDIA Hybrid Mamba2 with the following changes.
@@ -102,6 +106,10 @@ We used a cosine learning rate schedule, with a peak learning rate of `3e−4`, 
 
 We also performed a second phase training with high quality data from Hugging Face FineWeb-edu and Cosmopedia for an additional 200B tokens. We use a learning rate of 2e−5 and a cosine schedule to anneal the model, which helps improve the scores for our evaluation.
 
+### Data loader
+
+
+### Future work
 
 ## Artifacts
 
