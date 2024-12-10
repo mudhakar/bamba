@@ -3,6 +3,8 @@
 The below example shows an example of using CodeAlpaca dataset to fine tune the bamba model. 
 We will leverage [SFT TRainer](https://huggingface.co/docs/trl/en/sft_trainer#supervised-fine-tuning-trainer) for the same. 
 
+## Full parameter fine tuning
+
 ```
 from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedTokenizer, PreTrainedModel
 from datasets import load_dataset
@@ -91,6 +93,7 @@ trainer = SFTTrainer(
 # Start the training
 trainer.train()
 ```
+## LoRA Tuning 
 
 To tune only [LoRA adapters](https://arxiv.org/abs/2106.09685), we can additionally specify a [LoRAConfig](https://huggingface.co/docs/peft/en/package_reference/lora#peft.LoraConfig) to SFT Trainer.
 
