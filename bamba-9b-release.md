@@ -75,7 +75,13 @@ We invite the community to help improve the model further and identify any funda
 ## Inference efficiency
 The **KV-cache bottleneck** is the biggest challenge for Large language models and the community has furiously pursued addressing this issue through different approaches - quantization, pruning for standard transformers and of course novel model architectures such as Mamba2, Linear transformers, and Retnets. Realizing inference gains at production time is non-trivial even for changes to standard transformers - typically needing custom kernels that scale with the problem size. One key reason to pursue Mamba2 architecture is to build on the momentum of availability of kernels in the community. This effort furthers the progress by fixing issues in the core Mamba2 kernels via the popular vLLM model serving framework.
 
-Our current progression of integration into vLLM can be tracked via [this PR](). We use benchmark the inference latency 
+Our current progression of integration into vLLM can be tracked via [this PR](). We use this PR to benchmark the inference latencies against a typical transformer architecture; we pick Meta Llama 3.1 8B because of its popularity and that it will be highly optimized. We use an NVIDIA H100 80GB GPU for obtaining our measurements and use our measurement framework to obtain throughput in tokens/second. We pick input size as 1K tokens and generate varying outputs (from 2K to 64K) and at varying batch sizes. 
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/ed9901d5-7721-4158-8fc7-3106ae50097f" alt="Bamba-ratios" width="600" height="300">
+</p>
+
+[TODO: Summarize the issues in vLLM here]
 
 ## Model architecture
 We base our model architecture on the NVIDIA Hybrid Mamba2 with the following changes.
