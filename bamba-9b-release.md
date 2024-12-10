@@ -110,21 +110,41 @@ We use Dolma v1.7 for the first phase of training and the data mixes chosen are 
 <p align="center">
 <img src="https://github.com/user-attachments/assets/0bc03608-fc3d-4886-b746-9839c52261d5" alt="Datamix" width="600" height="400">
 </p>
-<p align="center">
-**Data mix for pretraining phase one**
-</p>
+<p align="center"><strong>Data mix for pretraining phase one</strong></p>
 
 
 ## Pre-Training
-Pre-training Bamba was done in a phased manner, we performed ablation experiments at 1.8B model size and a few 100B tokens to determine the right learning rates and built on the previous community efforts - significant hyperparamters were borrowed from the Mamba2 paper and repository. Based on the promising results from this study, we scaled the model to 3B and 2T tokens using Dolma mix. We also trained a 3B transformer model following Meta Llama architecture with the same data mix and observed similar or better performance from the Bamba model.
+Pre-training Bamba was done in a phased manner, we performed ablation experiments at 1.8B model size and a few 100B tokens to determine the right learning rates and built on the previous community efforts. Based on the promising results from this study, we scaled the model to 3B and 2T tokens using Dolma mix. We also trained a 3B transformer model following Meta Llama architecture with the same data mix and observed similar or better performance from the Bamba model. Finally, we scaled the model to 9B size and leveraged PyTorch FSDP to train the model. 
 
-Finally, we scaled the model to 9B size and leveraged PyTorch FSDP to train the model. 
+We used a cosine learning rate schedule, with a peak learning rate of `3e−4`, a quadratic warmup over 2000 steps, decay factor of 0.033, and an ending learning rate of `1e−5` over 2T tokens. We use the AdamW optimizer with `β1` of 0.9 and `β2` of 0.95. We use a weight decay of 0.1, sequence length of 4096, and a global batch size of 1.5M tokens/batch. We used 192 A100 GPUs from the [IBM Cloud Vela](https://research.ibm.com/blog/AI-supercomputer-Vela-GPU-cluster) production cluster to train this model over a period of 2 months. This cluster runs on Red Hat Open Shift platform and is built on IBM's full stack (e.g., PyTorch, vLLM). We experienced few (2-3) job interruptions, which were attributed to incorrect deployment of jobs and hardware failures.
 
-We used a cosine learning rate schedule, with a peak learning rate of `3e−4`, a quadratic warmup over 2000 steps, decay factor of 0.033, and an ending learning rate of `1e−5` over 2T tokens. We use the AdamW optimizer with `β1` of 0.9 and `β2` of 0.95. We use a weight decay of 0.1, sequence length of 4096, and a global batch size of 1.5M tokens/batch.
-
-We also performed a second phase training with high quality data from Hugging Face FineWeb-edu and Cosmopedia for an additional 200B tokens. We use a learning rate of 2e−5 and a cosine schedule to anneal the model, which helps improve the scores for our evaluation.
+We also performed a second phase training with high quality data from Hugging Face FineWeb-edu and Cosmopedia for an additional 200B tokens. We use a learning rate of 2e−5 and a cosine schedule to anneal the model, which helps improve our scores. We are currently experimenting with additional high quality data and will release any future checkpoints as part of our commitment to open source.
 
 ### Data loader
+There are several aspects to train a high quality language model, one of them being a data loader. We have been working over the past 18 months on creating a dataloader that satisfies the demands of a large scale distributed training and trading that off with model quality. We open source this data loader to enable others to use it in conjunction with their framework of choice, we have used it in the Bamba model training as well as integrated with Torch Titan. To date, we believe this is the only open source dataloader that provides a rich set of features.
+
+The data loader provides the following key features:
+1. **Stateful and checkpointable** to ensure seamless resumption mid-epoch
+2. **Auto-rescales** to changing workload and GPU allocations
+3. Data **streaming** with **zero-overhead** for **shuffling**
+4. **Asynchronous distributed** operation with no peer-to-peer communication
+5. Allows for **dynamic data mixing** and on-the-fly tokenization
+6. PyTorch native, **modular**, and **extensible**
+
+We have battle tested this data loader over hundreds of training jobs and optimized it over months of continuous operation. While theoretical random shuffle would require global visibility, we empirically demonstrate that using a distributed stateless shuffle is sufficient (this lets us scale to arbitrary sizes without imposing any communications overhead at time of training). We use the [Linear Congruential Generator (LCG)](https://en.wikipedia.org/wiki/Linear_congruential_generator) to generate random walks on the input data, which eliminates state maintenance while providing us the property of visiting a token exactly once during training time (in a single epoch). Data mixes are spread uniformly across the GPUs to ensure that each GPU "sees" an exact representation of the mix chosen at training launch. We compare an ideal random shuffle over 1.5K data points with that generated by the stateless shuffle using LCG in the below figure and observe that there are no significant differences.
+
+<div style="text-align: center;">
+  <div style="display: inline-block; margin: 10px;">
+    <img src="https://github.com/user-attachments/assets/33c1302a-1669-4d59-9072-98b058c7914d" alt="Figure 1" style="display: block; margin: auto;" width="323" height="125">
+    <p>Ideal random shuffle</p>
+  </div>
+  <div style="display: inline-block; margin: 10px;">
+    <img src="https://github.com/user-attachments/assets/d3c35613-c877-4db8-ab56-060e32243bd1" alt="Figure 2" style="display: block; margin: auto;" width="323" height="125">
+    <p>Distributed stateless shuffle</p>
+  </div>
+</div>
+<p style="text-align: center;">Comparison of ideal random shuffle with distributed stateless shuffle</p>
+
 
 
 ### Future work
