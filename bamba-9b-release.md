@@ -6,12 +6,12 @@
 
 Standard `transformer` models are being adopted and deployed in production settings, where memory bandwidth bottleneck has emerged as a key challenge. The bottleneck is due to the per token decoding step which is very light on compute, but bottlenecked for short sequences by moving weights between memory and compute and for longer sequences moving KV-cache between memory and compute. As longer sequence models (e.g., Meta Llama3.1 is 128K, IBM Granite code v2 is 128K, Mistral large is 32k) are becoming popular due to the demands of applications, KV-cache bottleneck dominates. The key reason for KV-cache growth is the full attention layer, which results in linear growth in KV-cache with sequence length. While there are approaches to compress the KV-cache via lower precision, layer pruning, and compression, it does not fundamentally eliminate the problem. A new class of architectures for keeping KV-cache constant have emerged (e.g., Mamba2, DeltaNet, Linear attention) with the most promising of them being the Mamba layer. We have seen some proof points emerge in the last year (e.g., NVIDIA Mamba2, Codestral Mamba, Jamba, Samba, etc.).
 
-We introduce Bamba, another proof point that improves on the existing SoTA Mamba models in its size and closes the gap further with SoTA transformer models. Inspired by AllenAI, in this collaboration between IBM, Princeton, and UIUC, we provide the entire lineage of data for training, multiple checkpoints, and the code for pretraining. We also enable the inference of this model in key OSS communities - Hugging Face `transformers`, `TRL`, `vLLM`, and `llama.cpp` to allow developers to use the model from the get go. We will share the details of our learnings when training this model and we welcome the community to help further close the gap with SoTA open source models and bring Mamba architecture to mainstream models and alleviate the KV-cache bottleneck.
+We introduce Bamba, a 9B Mamba2 hybrid model that adds to the proof point of these emerging architectures and closes the gap further with SoTA transformer models. Inspired by AllenAI, in this collaboration between IBM, Princeton, and UIUC, we provide the entire lineage of data for training, multiple checkpoints, and the code for pretraining. We also enable this model in key OSS communities - Hugging Face `transformers`, `TRL`, and `vLLM` to allow developers to use the model from the get go. We will share the details of our learnings when training this model and welcome the community to help further close the gap with SoTA open source models and bring Mamba architecture to mainstream models and alleviate the KV-cache bottleneck.
 
 ## Evaluations
 
 We break our evaluations into three parts:
-1. Comparison with Mamba architecture based lnaguage models
+1. Comparison with Mamba architecture based language models
 2. Comparison with transformers trained to similar tokens
 3. Comparison with SoTA transformer models of similar size
 
@@ -80,13 +80,13 @@ We invite the community to help improve the model further and identify any funda
 ## Inference efficiency
 The **KV-cache bottleneck** is the biggest challenge for Large language models and the community has furiously pursued addressing this issue through different approaches - quantization, pruning for standard transformers and of course novel model architectures such as Mamba2, Linear transformers, and Retnets. Realizing inference gains at production time is non-trivial even for changes to standard transformers - typically needing custom kernels that scale with the problem size. One key reason to pursue Mamba2 architecture is to build on the momentum of availability of kernels in the community. This effort furthers the progress by fixing issues in the core Mamba2 kernels via the popular vLLM model serving framework.
 
-Our current progression of integration into vLLM can be tracked via [this PR](). We use this PR to benchmark the inference latencies against a typical transformer architecture; we pick Meta Llama 3.1 8B because of its popularity and that it will be highly optimized. We use an NVIDIA H100 80GB GPU for obtaining our measurements and use our measurement framework to obtain throughput in tokens/second. We pick input size as 1K tokens and generate varying outputs (from 2K to 64K) and at varying batch sizes. 
+Our current progression of integration into vLLM can be tracked via [this PR](https://github.com/vllm-project/vllm/pull/10909). We use this PR to benchmark the inference latencies against a typical transformer architecture; we pick Meta Llama 3.1 8B because of its popularity and that it will be highly optimized. We use an NVIDIA H100 80GB GPU for obtaining our measurements and use our measurement framework to obtain throughput in tokens/second. We pick input size as 1K tokens and generate varying outputs (from 2K to 64K) and at varying batch sizes. Even though the model is 20% bigger than Llama 3.1 8B, as batch size and sequence lengths increase, Bamba outperforms a similar sized transformer model by a margin of 2x. 
 
 <p align="center">
 <img src="https://github.com/user-attachments/assets/ed9901d5-7721-4158-8fc7-3106ae50097f" alt="Bamba-ratios" width="600" height="300">
 </p>
 
-[TODO: Summarize the issues in vLLM here]
+Our analysis indicates that on a H100 NVIDIA GPU, we expect 4-5x speedup when inference shifts to a memory bottleneck (which typically happens in production settings). However, we have not realized that in vLLM because of two primary reasons: (i) chunked pre-fill is not supported for Bamba and any Mamba2 based architectures, (ii) memory allocation is assuming standard transformer KV-cache, and (iii) kernels are not optimized for inference. These issues are being tracked [here](https://github.com/foundation-model-stack/bamba/issues/3).
 
 ## Model architecture
 We base our model architecture on the NVIDIA Hybrid Mamba2 with the following changes.
@@ -133,28 +133,25 @@ The data loader provides the following key features:
 
 We have battle tested this data loader over hundreds of training jobs and optimized it over months of continuous operation. While theoretical random shuffle would require global visibility, we empirically demonstrate that using a distributed stateless shuffle is sufficient (this lets us scale to arbitrary sizes without imposing any communications overhead at time of training). We use the [Linear Congruential Generator (LCG)](https://en.wikipedia.org/wiki/Linear_congruential_generator) to generate random walks on the input data, which eliminates state maintenance while providing us the property of visiting a token exactly once during training time (in a single epoch). Data mixes are spread uniformly across the GPUs to ensure that each GPU "sees" an exact representation of the mix chosen at training launch. We compare an ideal random shuffle over 1.5K data points with that generated by the stateless shuffle using LCG in the below figure and observe that there are no significant differences.
 
-<div style="text-align: center;">
-  <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-    <div>
-      <img src="https://github.com/user-attachments/assets/33c1302a-1669-4d59-9072-98b058c7914d" alt="Figure 1" style="max-width: 100%;">
-      <p>Ideal random shuffle</p>
-    </div>
-    <div>
-      <img src="https://github.com/user-attachments/assets/d3c35613-c877-4db8-ab56-060e32243bd1" alt="Figure 2" style="max-width: 100%;">
-    <p>Distributed stateless shuffle</p>
-    </div>
-  </div>
-<p style="text-align: center;">Comparison of ideal random shuffle with distributed stateless shuffle</p>
-</div>
 
+| ![Figure 1](https://github.com/user-attachments/assets/33c1302a-1669-4d59-9072-98b058c7914d "Figure 1") | ![Figure 2](https://github.com/user-attachments/assets/d3c35613-c877-4db8-ab56-060e32243bd1 "Figure 2") |
+|:--:|:--:|
+| **Figure 1:** Ideal random shuffle. | **Figure 2:** Distributed stateless shuffle. |
+
+We have recently added support to consume datasets directly from Hugging Face as long as they are indexed. The primary code base is located in our repo [here](https://github.com/foundation-model-stack/fms-fsdp/blob/main/fms_fsdp/utils/dataset_utils.py) and we have also worked with Torch Titan team to make it available [here](https://github.com/pytorch/torchtitan/pull/376). We are working with the Meta PyTorch team to contribute this data loader into core PyTorch.
+
+## Quantization
 
 
 ### Future work
+There are several directions that we intend to explore and further these inference efficient architectures:
+1. Faster 
 
 ## Artifacts
 
 ## Contributors
 
 * **Data collection and curation**: We acknowledge and thank AllenAI team for making a high quality open source dataset Dolma as well as Hugging Face data team for making FineWeb-edu and Cosmopedia available. These are tremendous contributions and enable us to create the model today.
-* **Data preprocessing**: We thank IBM's internal data preprocessing team for helping tokenize the data at scale
+* **Data preprocessing**: We thank IBM's internal data preprocessing team for helping tokenize the data at scale. The code for tokenization is available [here](https://github.com/IBM/data-prep-kit)
+* **Model architecture**: 
 
