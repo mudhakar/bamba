@@ -18,7 +18,12 @@ We break our evaluations into three parts:
 We use a local copy of the [Open LLM leaderboard v1 and v2](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for our benchmarks, whereas for other models, we use the output from the Live leaderboard (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format, hence we report the numbers from the paper). For the v2 leaderboard results, we perform [normalization](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/normalization) and report the normalized results.
 
 TL;DR
-We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, we observe that we are on parity on various tasks and we believe that for those that we have gaps, it is due to lack of quality training data. We plan to continue training the current versions with newer datasets like Olmo2 mix and SFT datasets such as Tuluv3, agent instruct, and Anteater.
+We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, Bamba 9B rivals Meta Llama3.1 8B based on averages of OpenLLM v1 and v2 leaderboards. However, we acknowledge that there are gaps in certain key tasks such as MMLU and GSM8K. We have done experiments that indicate that this gap is due to lack of quality training data targeting these tasks. We plan to continue training the current versions with newer datasets like [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124) and SFT datasets such as [Tuluv3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture), [agent instruct](https://huggingface.co/datasets/microsoft/orca-agentinstruct-1M-v1), and [Anteater](https://huggingface.co/datasets/nvidia/Daring-Anteater).
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/71fe4c98-612d-476b-bff1-7dff7f8df98d" alt="Bamba-perf-avg" width="618" height="332">
+</p>
+
 
 ### Comparison with Hybrid Architectures
 Several Mamba based architecture models have started coming up in the last 6months (e.g., NVIDIA Hybrid Mamba2, Codestral Mamba, Falcon Mamba, Zamba7Bv1) furthering the performance of these architectures and demonstrating their inference performance as well as closing the gap with quality. We compare 8 key benchmarks across Bamba, NVIDIA Hybrid model, Zamba, and Falcon Mamba. Falcon Mamba is a pure Mamba model, Zamba has shared attention layer for every 6 Mamba layers, and Bamba and NVIDIA are both Hybrid models with full attention layers interspersed with Mamba layer. While Falcon Mamba performs the best overall and has been trained to 5.5T tokens, there are open questions on how well copying tasks work on such pure Mamba models. Zamba was trained on fewer tokens (1T), but with a different Hybrid architecture. Bamba and NVIDIA Mamba are quite similar to each other (details on differences are summarized in the model architecture section), but Bamba is trained to 2.2T and NVIDIA Hybrid Mamba is trained to 3.5T tokens. The key point is that even with all these architectural variations and different number of tokens, Mamba based models are demonstrating competitive results. We are continuing to train the Bamba model with latest datasets and plan to release future checkpoints as the model gets better.
@@ -118,4 +123,9 @@ We also performed a second phase training with high quality data from Hugging Fa
 ### Future work
 
 ## Artifacts
+
+## Contributors
+
+* **Data collection and curation**: We acknowledge and thank AllenAI team for making a high quality open source dataset Dolma as well as Hugging Face data team for making FineWeb-edu and Cosmopedia available. These are tremendous contributions and enable us to create the model today.
+* **Data preprocessing**: We thank IBM's internal data preprocessing team for helping tokenize the data at scale
 
