@@ -1,11 +1,11 @@
 # Fine-tuning
 
 The below example shows an example of using CodeAlpaca dataset to fine tune the bamba model. 
-We will leverage [SFT TRainer](https://huggingface.co/docs/trl/en/sft_trainer#supervised-fine-tuning-trainer) for the same. 
+We will leverage [SFT Trainer](https://huggingface.co/docs/trl/en/sft_trainer#supervised-fine-tuning-trainer) for the same.
 
 ## Full parameter fine tuning
 
-```
+```python
 from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedTokenizer, PreTrainedModel
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
@@ -41,7 +41,7 @@ def tokenizer_and_embedding_resize(
         dict: Metadata on number of added tokens
     """
     num_new_tokens = tokenizer.add_special_tokens(special_tokens_dict)
-    embedding_size = int(math.ceil(len(tokenizer)))
+    embedding_size = math.ceil(len(tokenizer))
     num_new_tokens = num_new_tokens + embedding_size - len(tokenizer)
     model.resize_token_embeddings(embedding_size)
     if num_new_tokens > 0:
@@ -97,8 +97,8 @@ trainer.train()
 
 To tune only [LoRA adapters](https://arxiv.org/abs/2106.09685), we can additionally specify a [LoRAConfig](https://huggingface.co/docs/peft/en/package_reference/lora#peft.LoraConfig) to SFT Trainer.
 
-```
-# follow example above
+```python
+# follow example above for full fine-tuning
 
 # add peft config
 peft_config = LoraConfig(
@@ -121,3 +121,14 @@ trainer = SFTTrainer(
 
 trainer.train()
 ```
+
+### Multi-GPU tuning
+
+For maximum efficiency it is recommended to use A100 or H100 GPU(s). [Full parameter fine tuning](#full-parameter-fine-tuning) is expected to take up more memory than [LoRA tuning](#lora-tuning), and thus may need more than 1 GPU for tuning.
+
+To launch distributed training, you may leverage frameworks such as [accelerate library](https://huggingface.co/docs/accelerate/en/index).
+
+```
+accelerate launch --num_processes=2 {myscript.py}
+```
+`num_processes` should be set to the number of GPUs you want to use. Refer to the [tutorial](https://huggingface.co/docs/accelerate/en/basic_tutorials/launch) for more ways to use accelerate.
