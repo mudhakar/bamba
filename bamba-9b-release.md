@@ -22,10 +22,10 @@ We break our evaluations into three parts:
 We use a local copy of the [Open LLM leaderboard v1 and v2](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for our benchmarks, whereas for other models, we use the output from the Live leaderboard (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format, hence we report the numbers from the paper). For the v2 leaderboard results, we perform [normalization](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/normalization) and report the normalized results.
 
 TL;DR
-We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, Bamba 9B rivals Meta Llama3.1 8B based on averages of OpenLLM v1 and v2 leaderboards. However, we acknowledge that there are gaps in certain key tasks such as MMLU and GSM8K. We have done experiments that indicate that this gap is due to lack of quality training data targeting these tasks. We plan to continue training the current versions with newer datasets like [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124) and SFT datasets such as [Tuluv3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture), [agent instruct](https://huggingface.co/datasets/microsoft/orca-agentinstruct-1M-v1), and [Anteater](https://huggingface.co/datasets/nvidia/Daring-Anteater).
+We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, Bamba 9B has gaps in math benchmarks and MMLU (without these benchmarks, the average scores are nearly equal to Meta Llama 3.1 8B with 48.01 and 48.22 as the averages). We have done experiments that indicate that this gap is due to lack of quality training data in Math. We plan to continue training the current versions with newer datasets like [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124) and SFT datasets such as [Tuluv3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture), [agent instruct](https://huggingface.co/datasets/microsoft/orca-agentinstruct-1M-v1), and [Anteater](https://huggingface.co/datasets/nvidia/Daring-Anteater).
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/71fe4c98-612d-476b-bff1-7dff7f8df98d" alt="Bamba-perf-avg" width="618" height="332">
+<img src="https://github.com/user-attachments/assets/749fa596-818c-4d81-8978-67b6c8916164" alt="Bamba-perf-avg" width="618" height="332">
 </p>
 
 
@@ -76,7 +76,8 @@ Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite
 | MuSR           | 9.59     | 9.88            | 8.72              | 9.32              | **10.02** |
 | GSM8K          | 36.77    | 52.08           | 49.96             | 62.55             | **68.01** |
 | GPQA           | 4.14     | 8.17            | 8.61              | **9.06**          | 4.92      |
-| **Average**    | 47.92    | 50.09           | 48.61             | **56.77**         | 54.89     |
+| MathLvl5       | 1.66     | 4.0             | 5.14              | **9.82**          | 4.38      |
+| **Average**    | 42.22    | 44.52           | 44.74            | **47.70**             | 45.63     |
 
 
 We invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
@@ -125,7 +126,7 @@ We used a cosine learning rate schedule, with a peak learning rate of `3e−4`, 
 
 We also performed a second phase training with high quality data from Hugging Face FineWeb-edu and Cosmopedia for an additional 200B tokens. We use a learning rate of 2e−5 and a cosine schedule to anneal the model, which helps improve our scores. We are currently experimenting with additional high quality data and will release any future checkpoints as part of our commitment to open source.
 
-### Data loader
+## Data loader
 There are several aspects to train a high quality language model, one of them being a data loader. We have been working over the past 18 months on creating a dataloader that satisfies the demands of a large scale distributed training and trading that off with model quality. We open source this data loader to enable others to use it in conjunction with their framework of choice, we have used it in the Bamba model training as well as integrated with Torch Titan. To date, we believe this is the only open source dataloader that provides a rich set of features.
 
 The data loader provides the following key features:
@@ -146,6 +147,9 @@ We have battle tested this data loader over hundreds of training jobs and optimi
 We have recently added support to consume datasets directly from Hugging Face as long as they are indexed. The primary code base is located in our repo [here](https://github.com/foundation-model-stack/fms-fsdp/blob/main/fms_fsdp/utils/dataset_utils.py) and we have also worked with Torch Titan team to make it available [here](https://github.com/pytorch/torchtitan/pull/376). We are working with the Meta PyTorch team to contribute this data loader into core PyTorch.
 
 ## Quantization
+We recently open sourced a [framework](https://github.com/foundation-model-stack/fms-model-optimizer/) for quantization of models. Through this framework, we leverage the [llm-compressor](https://github.com/vllm-project/llm-compressor) to quantize the Bamba checkpoints to `fp8`. We observed minimal loss in accuracy across all the benchmarks of the OpenLLM leaderboard. These quantized checkpoints are also released along with the `bf16` counterparts. This also validates that Bamba models are amenable to quantization much like SoTA transformer models.
+
+## Context length extension
 
 
 ### Future work
