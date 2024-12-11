@@ -10,7 +10,7 @@ As the demand for longer-sequence models grows, such as [Meta’s Llama 3.1](htt
 
 While techniques like lower precision, layer pruning, and compression can reduce KV-cache size, they do not address the root cause. To tackle this, a new class of architectures that maintain a constant KV-cache size has emerged, including Mamba2, [DeltaNet](https://arxiv.org/abs/2406.06484), and [Griffin](https://arxiv.org/abs/2402.19427). Among these, the Mamba architecture has received widespread community attention, with several implementations demonstrating its potential over the past year, such as NVIDIA Mamba2, Codestral Mamba, Jamba, and Samba.
 
-We introduce Bamba, a 9B Mamba2 hybrid model that adds to the proof point of these emerging architectures and closes the gap further with SoTA transformer models. Inspired by AllenAI, in this collaboration between IBM, Princeton, and UIUC, we provide the entire lineage of data for training, multiple checkpoints, and the code for pretraining. We also enable this model in key OSS communities - Hugging Face `transformers`, `TRL`, and `vLLM` to allow developers to use the model from the get go. We will share the details of our learnings when training this model and welcome the community to help further close the gap with SoTA open source models and bring Mamba architecture to mainstream models and alleviate the KV-cache bottleneck.
+We introduce Bamba, a 9B Mamba2 hybrid model that adds to the proof point of these emerging architectures and closes the gap further with SoTA transformer models. Inspired by AllenAI, in this collaboration between IBM, Princeton, CMU, and UIUC, we provide the entire lineage of data for training, multiple checkpoints, and the code for pretraining. We also enable this model in key OSS communities - Hugging Face `transformers`, `TRL`, and `vLLM` to allow developers to use the model from the get go. We will share the details of our learnings when training this model and welcome the community to help further close the gap with SoTA open source models and bring Mamba architecture to mainstream models and alleviate the KV-cache bottleneck.
 
 ## Evaluations
 
@@ -87,9 +87,6 @@ The **KV-cache bottleneck** is the biggest challenge for Large language models a
 
 Our current progression of integration into vLLM can be tracked via [this PR](https://github.com/vllm-project/vllm/pull/10909). We use this PR to benchmark the inference latencies against a typical transformer architecture; we pick Meta Llama 3.1 8B because of its popularity and that it will be highly optimized. We use an NVIDIA H100 80GB GPU for obtaining our measurements and use our measurement framework to obtain throughput in tokens/second. We pick input size as 1K tokens and generate varying outputs (from 2K to 64K) and at varying batch sizes. We plot for different sequence lengths (8k to 64k) both the throughput and latencies compared to Llama 3.1 8B. We observe that as batch size and sequence lengths increase, Bamba outperforms a similar sized transformer model by a margin of 2x in throughput and latency. From an inference standpoint, these architectures benefit both latency for real-time applications as well as utilization of the GPU. Note that ratios greater than 1 for throughput are beneficial and latencies less than 1 are beneficial.
 
-<p align="center">
-<img src="https://github.com/user-attachments/assets/ed9901d5-7721-4158-8fc7-3106ae50097f" alt="Bamba-ratios" width="600" height="300">
-</p>
 
 | ![Figure 1](images/bamba_llama_txput_ratios.png "Figure 1") | ![Figure 2](images/bamba_llama_latencies_ratios.png "Figure 2") |
 |:--:|:--:|
@@ -154,18 +151,44 @@ We have recently added support to consume datasets directly from Hugging Face as
 ## Quantization
 We recently open sourced a [framework](https://github.com/foundation-model-stack/fms-model-optimizer/) for quantization of models. Through this framework, we leverage the [llm-compressor](https://github.com/vllm-project/llm-compressor) to quantize the Bamba checkpoints to `fp8`. We observed minimal loss in accuracy across all the benchmarks of the OpenLLM leaderboard. These quantized checkpoints are also released along with the `bf16` counterparts. This also validates that Bamba models are amenable to quantization much like SoTA transformer models.
 
-## Context length extension
+We are in the process of enabling `fp8` inference for this model in vLLM, which will require updating the kernels. Linear layers and full attention will be easy to tackle, but the Mamba layers will require updates to the Triton/CUDA kernels to handle `fp8`. Our initial analysis indicates that there is one specific layer, which is performing `matmul`, which should make this upgrade smooth.
 
+## Context length extension
+We are currently exploring various approaches to long context length extensions beginning with applying [LongRope](https://github.com/microsoft/LongRoPE/tree/main) to the full attention layers. 
+
+We use PhoneBook retrieval as the task to measure our performance and compare against three variations of Meta Llama - LLama2, Llama3, LLama3.1, with context lengths of 4K, 8K, and 128K. We context length extend the Bamba model by 4x and 8x and compare the performance on these tasks, which are plotted below.
+
+<p align="center">
+<img src="images/phonebook.png" alt="Datamix" width="300" height="200">
+</p>
+<p align="center"><strong>Data mix for pretraining phase one</strong></p>
+
+We observe that the Bamba model performs well up to 16K context length without any tuning on this task. We plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
 
 ### Future work
 There are several directions that we intend to explore and further these inference efficient architectures:
-1. Faster 
+1. Continue to improve the models through additional data and continued training, we welcome any feedback from the community so we can collectively create a kick-ass Mamba model
+2. vLLM enablement of the model working with the community. The issues on chunked prefill and managing the memory allocation for this architecture will be key.
+3. Enabling `fp8` kernels to make inference even faster
+4. Training time improvements and applying `torch.compile` as well as `fp8` training, both of which our team has [demonstrated](https://pytorch.org/blog/training-using-float8-fsdp2/) on transformer architectures working with Meta.
+5. Long context length extensions and targeting 1M+.
 
 ## Artifacts
+1. [Hugging Face Bamba collection](https://huggingface.co/collections/ibm-fms/bamba-674f1388b9bbc98b413c7bab)
+2. [GitHub repo](https://github.com/foundation-model-stack/bamba)
+3. [Dataloader](https://github.com/foundation-model-stack/fms-fsdp/blob/main/fms_fsdp/utils/dataset_utils.py)
+4. [Transformers]()
+5. [vLLM PR](https://github.com/vllm-project/vllm/pull/10909)
 
 ## Contributors
 
 * **Data collection and curation**: We acknowledge and thank AllenAI team for making a high quality open source dataset Dolma as well as Hugging Face data team for making FineWeb-edu and Cosmopedia available. These are tremendous contributions and enable us to create the model today.
-* **Data preprocessing**: We thank IBM's internal data preprocessing team for helping tokenize the data at scale. The code for tokenization is available [here](https://github.com/IBM/data-prep-kit)
-* **Model architecture**: 
+* **Data preprocessing**: We thank IBM's internal data preprocessing team, specifically Yan Koyfman, Tuan Hoang Trong, and Nirmit Desi for helping tokenize the data at scale. The code for tokenization is available [here](https://github.com/IBM/data-prep-kit)
+* **Model architecture**: The model architecture design was jointly done by Princeton, CMU, IBM, and UIUC and involved the following folks: Tri Dao (Princeton), Albert Gu (CMU), Linsong Chu (IBM), Davis Wertheimer (IBM), Minjia Zhang (UIUC), Mudhakar Srivatsa (IBM), and Raghu Ganti (IBM).
+* **Model training**: Model training was performed primarily by IBM team using the Mamba2 kernels and layer implementation from Tri Dao and Albert Gu. The following folks from IBM were primarily invovled: Linsong Chu, Divya Kumari, Davis Wertheimer, Raghu Ganti, and Dakshi Agrawal. 
+* **Model tuning**: Tuning of the model was enabled in [TRL](https://github.com/huggingface/trl) by the IBM team, involving Sukriti Sharma and Anh Uong.
+* **Model inference**: Enablement of the model for inference in various ecosystems such as `transformers`, `vLLM`, and `llama.cpp` was performed by the following folks between IBM and UIUC: Fabian Lim, Antoni viros i Martin, Adnan Hoque, Jamie Yang, Nelson Nimura Gomez, Joshua Rosenkranz, Nick Hill, Gabe Goodhart (IBM), Haochen Shen, and Minjia Zhang (UIUC)
+* **Long context extension**: Long context extensions are being led by the UIUC team in collaboration with IBM involving Haochen Shen, Minjia Zhang (UIUC) and Davis Wertheimer (IBM)
+* **Quantization**: Quantization is led by IBM team - Naigang Wang and Charlie Liu
+* **Evaluations**: Evaluations are led by a team in IBM with long context evaluations being performed by UIUC, involving the following folks: Yotam Perlitz, Ofir Arviv, Michal Shmueli-Scheuer (IBM), Haoechen Shen, and Minjia Zhang (UIUC).
 
