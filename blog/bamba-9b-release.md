@@ -161,7 +161,6 @@ We use PhoneBook retrieval as the task to measure our performance and compare ag
 <p align="center">
 <img src="images/phonebook.png" alt="Datamix" width="300" height="200">
 </p>
-<p align="center"><strong>Data mix for pretraining phase one</strong></p>
 
 We observe that the Bamba model performs well up to 16K context length without any tuning on this task. We plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
 
