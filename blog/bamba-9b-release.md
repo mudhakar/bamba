@@ -154,13 +154,13 @@ We are in the process of enabling `fp8` inference for this model in vLLM, which 
 ## Context length extension
 We are currently exploring various approaches to long context length extensions beginning with applying [LongRope](https://github.com/microsoft/LongRoPE/tree/main) to the full attention layers. 
 
-We use PhoneBook retrieval as the task to measure our performance and compare against three variations of Meta Llama - LLama2, Llama3, LLama3.1, with context lengths of 4K, 8K, and 128K. We context length extend the Bamba model by 4x and 8x and compare the performance on these tasks, which are plotted below.
+We use PhoneBook retrieval as the task to measure our performance. We extend the Bamba context length by 4x and 8x and compare the context-extended Bamba against three variations of Meta Llama - LLama2, Llama3, LLama3.1, with training context lengths of 4K, 8K, and 128K. The results are plotted below.
 
 <p align="center">
 <img src="images/phonebook.png" alt="Datamix" width="300" height="200">
 </p>
 
-We observe that the Bamba model performs well up to 16K context length without any tuning on this task. We plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
+We observe that the context-extended Bamba model performs well up to 16K context length without any tuning on this task, outperforming the original Bamba 9B model, Llama2-7B, and llama3-8B by a large martin and obtaining comparable performance as Llama3.1-8B. At sequence length 32K, LLama3.1 achieves the best performing result. However, note that LLama3.1-8B was trained with 128K context length, which incurs a much higher pre-training cost than Bamba. As a next step, we plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
 
 ### Future work
 There are several directions that we intend to explore and further these inference efficient architectures:
