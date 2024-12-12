@@ -17,7 +17,7 @@ We break our evaluations into three parts:
 2. Comparison with transformers trained to similar tokens
 3. Comparison with SoTA transformer models of similar size
 
-We use a local copy of the [Open LLM leaderboard v1 and v2](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for our benchmarks, whereas for other models, we use the output from the Live leaderboard (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format, hence we report the numbers from the paper). For the v2 leaderboard results, we perform [normalization](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/normalization) and report the normalized results.
+We use a local copy of the [Open LLM leaderboard v1 and v2](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard) for benchmarking all models except the NVIDIA Hybird Mamba model  where we use the output from the Live leaderboard (we could not run this for NVIDIA Hybird Mamba model as the model weights are not in Hugging Face transformers compatible format, hence we report the numbers from the paper). For the v2 leaderboard results, we perform [normalization](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/normalization) and report the normalized results.
 
 TL;DR
 We find that Bamba9B adds another proof point to similar models such as NVIDIA Mamba2, Zamba, and Falcon Mamba, while providing the entire data lineage. This will allow the community to surgically improve the model further. We also compare to similar sized transformer models and observe that our model outperforms since we use newer training techniques and better quality data. Compared to SoTA transformer models, Bamba 9B has gaps in math benchmarks and MMLU (without these benchmarks, the average scores are nearly equal to Meta Llama 3.1 8B with 48.01 and 48.22 as the averages). We have done experiments that indicate that this gap is due to lack of quality training data in Math. We plan to continue training the current versions with newer datasets like [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124) and SFT datasets such as [Tuluv3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture), [agent instruct](https://huggingface.co/datasets/microsoft/orca-agentinstruct-1M-v1), and [Anteater](https://huggingface.co/datasets/nvidia/Daring-Anteater).
@@ -30,9 +30,9 @@ We find that Bamba9B adds another proof point to similar models such as NVIDIA M
 ### Comparison with Hybrid Architectures
 Several Mamba based architecture models have started coming up in the last 6months (e.g., NVIDIA Hybrid Mamba2, Codestral Mamba, Falcon Mamba, Zamba7Bv1) furthering the performance of these architectures and demonstrating their inference performance as well as closing the gap with quality. We compare 8 key benchmarks across Bamba, NVIDIA Hybrid model, Zamba, and Falcon Mamba. Falcon Mamba is a pure Mamba model, Zamba has shared attention layer for every 6 Mamba layers, and Bamba and NVIDIA are both Hybrid models with full attention layers interspersed with Mamba layer. While Falcon Mamba performs the best overall and has been trained to 5.5T tokens, there are open questions on how well copying tasks work on such pure Mamba models. Zamba was trained on fewer tokens (1T), but with a different Hybrid architecture. Bamba and NVIDIA Mamba are quite similar to each other (details on differences are summarized in the model architecture section), but Bamba is trained to 2.2T and NVIDIA Hybrid Mamba is trained to 3.5T tokens. The key point is that even with all these architectural variations and different number of tokens, Mamba based models are demonstrating competitive results. We are continuing to train the Bamba model with latest datasets and plan to release future checkpoints as the model gets better.
   
-| Benchmark score   | Bamba 9B   | NVIDIA Mamba2 Hybrid 8B | Zamba 7B   | Falcon Mamba 7B   |
+| Benchmark score   | Bamba 9B   | NVIDIA Mamba2 Hybrid 8B* | Zamba 7B   | Falcon Mamba 7B   |
 |-------------------|------------|-------------------------|------------|-------------------|
-| MMLU (5-shot)     | 60.77      | 53.6                   | 57.85      | **63.19**         |
+| MMLU (5-Shot)      | 60.77      | 53.6                   | 57.85      | **63.19**         |
 | Hellaswag         | 81.8       | 77.69                  | **82.27**  | 80.82             |
 | Winogrande        | 76.87      | 71.27                  | **79.32**  | 78.14             |
 | Piqa              | 82.26      | 79.65                  | 82.21      | **83.62**         |
@@ -41,12 +41,14 @@ Several Mamba based architecture models have started coming up in the last 6mont
 | TruthfulQA        | 49.21      | 38.72                  | 49.69      | **53.46**         |
 | **Average**       | 65.96      | 58.78                  | 64.79      | **67.2**          |
 
+* Results are taken from [NVIDIA paper](https://arxiv.org/pdf/2406.07887)
+
 ## Comparison with transformers with similar token budget
 We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta Llama2 7B (2023), and IBM Granite 7B (2023), which have been trained to 2T tokens. While Olmo 7B outperforms Meta Llama2 and IBM Granite models across these 8 benchmarks, we note that with the same dataset, Bamba outperforms Olmo 7B. The main takeaway is that the Bamba model does well on the same dataset and similar token budget transformer models.
 
 | Benchmark score   | Bamba 9B   | Olmo1.5 7B   | Meta Llama2 7B   | IBM Granite 7B   |
 |-------------------|------------|--------------|------------------|------------------|
-| MMLU (5-shot)     | **60.77**  | 53.39        | 46.87            | 49.02            |
+| MMLU (5-Shot)     | **60.77**  | 53.39        | 46.87            | 49.02            |
 | Hellaswag         | **81.8**   | 78.65        | 78.59            | 77.0             |
 | Winogrande        | **76.87**  | 72.77        | 74.03            | 70.17            |
 | Piqa              | **82.26**  | 78.4         | 79.0             | 80.14            |
@@ -57,25 +59,32 @@ We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta L
 
 ### Comparison with SoTA transformer models
 
-Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite v3 8B, and Olmo2 7B). For the missing results in HF leaderboard, we rerun these (marked with a *). We observe that there are obvious benchmark gaps, but note that the Bamba and Falcon Mamba models are closing these benchmark gaps. We believe that with the right data (note that the latest transformer models have been trained on data from the last six months, before we trained our model), these gaps can be closed. For example, we had one small scale run that added `metamath` and improved our `GSM8k` score from `36.77` to `60.0`. We are continuing to train this model with latest datasets such as the one released by the AllenAI team - [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124), [Dolmino mix](https://huggingface.co/datasets/allenai/dolmino-mix-1124), and [TuluV3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture).
+Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite v3 8B, and Olmo2 7B). We observe that there are obvious benchmark gaps, but note that the Bamba and Falcon Mamba models are closing these benchmark gaps. We believe that with the right data (note that the latest transformer models have been trained on data from the last six months, before we trained our model), these gaps can be closed. For example, we had one small scale run that added `metamath` and improved our `GSM8k` score from `36.77` to `60.0`. We are continuing to train this model with latest datasets such as the one released by the AllenAI team - [Olmo2 mix](https://huggingface.co/datasets/allenai/olmo-mix-1124), [Dolmino mix](https://huggingface.co/datasets/allenai/dolmino-mix-1124), and [TuluV3](https://huggingface.co/datasets/allenai/tulu-3-sft-olmo-2-mixture).
 
+[HF LLM- V1](https://huggingface.co/docs/leaderboards/en/open_llm_leaderboard/archive):
 
-| Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B* |
+| Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|----------|------------------|-------------------|-------------------|-----------|
-| MMLU           | 60.77    | 63.19           | **66.70**         | 65.54             | 63.96     |
+| MMLU           | 60.77    | 63.19           | **66.26**         | 65.45             | 63.96     |
+| Hellaswag      | 81.80    | 80.82           | 81.98             | **83.29**         | 81.93     |
+| Winogrande     | 76.87    | 78.14           | 77.51             | **80.82**         | 77.03     |
+| ARC-C          | 63.23    | 63.40           | 57.85             | 63.74             | **64.51** |
+| TruthfulQA     | 49.21    | **53.46**       | 45.16             | 52.89             | 43.32     |
+| GSM8K          | 36.77    | 52.08           | 49.96             | 62.55             | **68.01** |
+| **Average**    |  57.86    |   61.13       |    60.17        |    **64.69**         | 62.18     |
+
+[HF LLM- V2](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/about):
+
+| Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
+|-----------------|----------|------------------|-------------------|-------------------|-----------|
 | MMLU PRO       | 17.53    | 14.33           | 25.46             | **25.83**         | 22.79     |
 | BBH            | 17.40    | 19.88           | 25.16             | **28.02**         | 21.69     |
-| Hellaswag      | 81.80    | 80.82           | 81.98             | **83.61**         | 81.93     |
-| Winogrande     | 76.87    | 78.14           | 77.51             | **80.90**         | 77.03     |
-| Piqa           | 82.26    | **83.62**       | 82.54             | 82.32             | 81.39     |
-| OpenbookQA     | 47.60    | 47.80           | 46.80             | 46.80             | **49.20** |
-| ARC-C          | 63.23    | 63.40           | 57.85             | 63.40             | **64.51** |
-| TruthfulQA     | 49.21    | **53.46**       | 45.16             | 52.89             | 43.32     |
+| Piqa           | 82.26    | **83.62**       | 82.54             | 82.41             | 81.39     |
+| OpenbookQA     | 47.60    | 47.80           | 46.80             | 47.60             | **49.20** |
 | MuSR           | 9.59     | 9.88            | 8.72              | 9.32              | **10.02** |
-| GSM8K          | 36.77    | 52.08           | 49.96             | 62.55             | **68.01** |
 | GPQA           | 4.14     | 8.17            | 8.61              | **9.06**          | 4.92      |
 | MathLvl5       | 1.66     | 4.0             | 5.14              | **9.82**          | 4.38      |
-| **Average**    | 42.22    | 44.52           | 44.74            | **47.70**             | 45.63     |
+| **Average**    |   25.42   |    28.53       |      27.11      |     **32.83**       |  27.0     |  
 
 
 We invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
@@ -154,13 +163,13 @@ We are in the process of enabling `fp8` inference for this model in vLLM, which 
 ## Context length extension
 We are currently exploring various approaches to long context length extensions beginning with applying [LongRope](https://github.com/microsoft/LongRoPE/tree/main) to the full attention layers. 
 
-We use PhoneBook retrieval as the task to measure our performance. We extend the Bamba context length by 4x and 8x and compare the context-extended Bamba against three variations of Meta Llama - LLama2, Llama3, LLama3.1, with training context lengths of 4K, 8K, and 128K. The results are plotted below.
+We use PhoneBook retrieval as the task to measure our performance and compare against three variations of Meta Llama - LLama2, Llama3, LLama3.1, with context lengths of 4K, 8K, and 128K. We context length extend the Bamba model by 4x and 8x and compare the performance on these tasks, which are plotted below.
 
 <p align="center">
 <img src="images/phonebook.png" alt="Datamix" width="300" height="200">
 </p>
 
-We observe that the context-extended Bamba model performs exceptionally well up to a 16K context length without any tuning, outperforming the original Bamba 9B model, Llama2-7B, and llama3-8B by a large margin and obtaining comparable performance as Llama3.1-8B. At sequence length 32K, LLama3.1 achieves the best performing result. However, note that LLama3.1-8B was trained with 128K context length, which incurs a much higher pre-training cost than Bamba. As a next step, we plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
+We observe that the Bamba model performs well up to 16K context length without any tuning on this task. We plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
 
 ### Future work
 There are several directions that we intend to explore and further these inference efficient architectures:
