@@ -73,7 +73,7 @@ Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite
 | GSM8K          | 36.77    | 52.08           | 49.96             | 62.55             | **68.01** |
 | **Average**    |  57.86    |   61.13       |    60.17        |    **64.69**         | 62.18     |
 
-[HF LLM- V2](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/about):
+[HF LLM- V2](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/about) + OpenbookQA and PIQA (all scores are normalized):
 
 | Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|----------|------------------|-------------------|-------------------|-----------|
@@ -189,12 +189,12 @@ There are several directions that we intend to explore and further these inferen
 ## Contributors
 
 * **Data collection and curation**: We acknowledge and thank AllenAI team for making a high quality open source dataset Dolma as well as Hugging Face data team for making FineWeb-edu and Cosmopedia available. These are tremendous contributions and enable us to create the model today.
-* **Data preprocessing**: We thank IBM's internal data preprocessing team, specifically Yan Koyfman, Tuan Hoang Trong, and Nirmit Desi for helping tokenize the data at scale. The code for tokenization is available [here](https://github.com/IBM/data-prep-kit)
+* **Data preprocessing**: We thank IBM's internal data preprocessing team, specifically Tuan Hoang Trong, Syed Zawad, Jay Gala, and Ryan Gordon for helping tokenize the data at scale. The code for tokenization is available [here](https://github.com/IBM/data-prep-kit)
 * **Model architecture**: The model architecture design was jointly done by Princeton, CMU, IBM, and UIUC and involved the following folks: Tri Dao (Princeton), Albert Gu (CMU), Linsong Chu (IBM), Davis Wertheimer (IBM), Minjia Zhang (UIUC), Mudhakar Srivatsa (IBM), and Raghu Ganti (IBM).
 * **Model training**: Model training was performed primarily by IBM team using the Mamba2 kernels and layer implementation from Tri Dao and Albert Gu. The following folks from IBM were primarily invovled: Linsong Chu, Divya Kumari, Davis Wertheimer, Raghu Ganti, and Dakshi Agrawal. 
 * **Model tuning**: Tuning of the model was enabled in [TRL](https://github.com/huggingface/trl) by the IBM team, involving Sukriti Sharma and Anh Uong.
-* **Model inference**: Enablement of the model for inference in various ecosystems such as `transformers`, `vLLM`, and `llama.cpp` was performed by the following folks between IBM and UIUC: Fabian Lim, Antoni viros i Martin, Adnan Hoque, Jamie Yang, Nelson Nimura Gomez, Joshua Rosenkranz, Nick Hill, Gabe Goodhart (IBM), Haochen Shen, and Minjia Zhang (UIUC)
-* **Long context extension**: Long context extensions are being led by the UIUC team in collaboration with IBM involving Haochen Shen, Minjia Zhang (UIUC) and Davis Wertheimer (IBM)
+@@ -191,3 +191,5 @@ There are several directions that we intend to explore and further these inferen
 * **Quantization**: Quantization is led by IBM team - Naigang Wang and Charlie Liu
 * **Evaluations**: Evaluations are led by a team in IBM with long context evaluations being performed by UIUC, involving the following folks: Yotam Perlitz, Ofir Arviv, Michal Shmueli-Scheuer (IBM), Haoechen Shen, and Minjia Zhang (UIUC).
 
+  Finally, we would like to thank our leadership for their support in this effort - Priya Nagpurkar, David Cox, Sriram Raghavan, Aya Soffer, and Mukesh Khare.
