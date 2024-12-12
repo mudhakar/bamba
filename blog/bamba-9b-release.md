@@ -160,7 +160,7 @@ We use PhoneBook retrieval as the task to measure our performance. We extend the
 <img src="images/phonebook.png" alt="Datamix" width="300" height="200">
 </p>
 
-We observe that the context-extended Bamba model performs well up to 16K context length without any tuning on this task, outperforming the original Bamba 9B model, Llama2-7B, and llama3-8B by a large martin and obtaining comparable performance as Llama3.1-8B. At sequence length 32K, LLama3.1 achieves the best performing result. However, note that LLama3.1-8B was trained with 128K context length, which incurs a much higher pre-training cost than Bamba. As a next step, we plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
+We observe that the context-extended Bamba model performs exceptionally well up to a 16K context length without any tuning, outperforming the original Bamba 9B model, Llama2-7B, and llama3-8B by a large margin and obtaining comparable performance as Llama3.1-8B. At sequence length 32K, LLama3.1 achieves the best performing result. However, note that LLama3.1-8B was trained with 128K context length, which incurs a much higher pre-training cost than Bamba. As a next step, we plan to pursue various other approaches to context length extensions and study the performance on more tasks. These long context length extended models will be released as well.
 
 ### Future work
 There are several directions that we intend to explore and further these inference efficient architectures:
