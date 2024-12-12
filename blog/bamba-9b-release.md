@@ -47,16 +47,16 @@ The take away from this table is that hyrbid mamba2 architecture can deliver com
 ## Comparison with transformers with similar token budget
 We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta Llama2 7B (2023), and IBM Granite 7B (2023), which have been trained to 2T tokens. While Olmo 7B outperforms Meta Llama2 and IBM Granite models across these 8 benchmarks, we note that with the same dataset, Bamba outperforms Olmo 7B. The main takeaway is that the Bamba model does as well or better than the tranformer models trained on the same dataset with similar token budget.
 
-| Benchmark score   | Bamba 9B   | Olmo1.5 7B   | Meta Llama2 7B   | IBM Granite 7B   |
-|-------------------|------------|--------------|------------------|------------------|
-| MMLU (5-Shot)     | **60.77**  | 53.39        | 46.87            | 49.02            |
-| Hellaswag         | **81.8**   | 78.65        | 78.59            | 77.0             |
-| Winogrande        | **76.87**  | 72.77        | 74.03            | 70.17            |
-| Piqa              | **82.26**  | 78.4         | 79.0             | 80.14            |
-| OpenbookQA        | 47.6       | **50.2**     | 44.0             | 40.8             |
-| ARC-C             | **63.23**  | 48.5         | 53.07            | 49.91            |
-| TruthfulQA        | **49.21**  | 36.0         | 38.76            | 38.7             |
-| **Average**       | **65.96**  | 59.7         | 59.19            | 57.96            |
+| Benchmark score   | Bamba 9B   | Olmo1.5 7B   | Bamba 9B (2T) | Meta Llama2 7B   | IBM Granite 7B   |
+|-------------------|------------|--------------|------------------|------------------|------------------|
+| MMLU (5-Shot)     | **60.77**  | 53.39        | 59.05 | 46.87            | 49.02            |
+| Hellaswag         | 81.8   | 78.65        | **83.66** | 78.59            | 77.0             |
+| Winogrande        | 76.87  | 72.77        | **79.40** | 74.03            | 70.17            |
+| Piqa              | 82.26  | 78.4         | **83.62** | 79.0             | 80.14            |
+| OpenbookQA        | 47.6       | **50.2**     | 47.60 | 44.0             | 40.8             |
+| ARC-C             | **63.23**  | 48.5         | 57.25 | 53.07            | 49.91            |
+| TruthfulQA        | **49.21**  | 36.0         | 38.26 | 38.76            | 38.7             |
+| **Average**       | **65.96**  | 59.7         | 64.12 | 59.19            | 57.96            |
 
 ### Comparison with SoTA transformer models
 
