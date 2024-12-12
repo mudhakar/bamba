@@ -197,4 +197,5 @@ There are several directions that we intend to explore and further these inferen
 * **Quantization**: Quantization is led by IBM team - Naigang Wang and Charlie Liu
 * **Evaluations**: Evaluations are led by a team in IBM with long context evaluations being performed by UIUC, involving the following folks: Yotam Perlitz, Ofir Arviv, Michal Shmueli-Scheuer (IBM), Haoechen Shen, and Minjia Zhang (UIUC).
 
-  Finally, we would like to thank our leadership for their support in this effort - Priya Nagpurkar, David Cox, Sriram Raghavan, Aya Soffer, and Mukesh Khare.
+
+Finally, we would like to thank our leadership for their support in this effort - Priya Nagpurkar, David Cox, Sriram Raghavan, Aya Soffer, and Mukesh Khare.
