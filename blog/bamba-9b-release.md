@@ -40,7 +40,7 @@ Several Mamba based architecture models have started coming up in the last 6 mon
 | TruthfulQA        | 49.21      | 38.72                  | 49.69      | **53.46**         |
 | **Average**       | 65.96      | 58.78                  | 64.79      | **67.2**          |
 
-\* Results are taken from [NVIDIA paper](https://arxiv.org/pdf/2406.07887)
+\* Results are taken from [NVIDIA paper](https://arxiv.org/pdf/2406.07887).
 
 The take away from this table is that hyrbid mamba2 architecture can deliver competitive results while being nearly as efficient to train as transformer models. Furthermore, they can deliver significant improvement (theoretically up to 5x) in inference efficiency despite having full attention layers interspersed with mamba2 layers. We are continuing to pretrain the Bamba model with latest datasets and plan to release future checkpoints as the model gets better.
 
@@ -62,7 +62,7 @@ We pick a few promiment models: Olmo 7B trained on identical data (2024), Meta L
 
 Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite v3 8B, and Olmo2 7B). For the missing benchmark results in HF leaderboard, we rerun the benchmarks (marked with a *). We observe that while there are obvious benchmark gaps, it is not clear that these gaps can be attributed to the defficiencies of the mamba architecture. In fact, a careful analysis of results shows that gaps are largly due to amount of data used for training models and inclusion of benchmark-aligned instruction datasets during the annealing phase. For example, we had one small scale run that added `metamath` and improved our `GSM8k` score from `36.77` to `60.0`.
 
-[HF LLM- V1](https://huggingface.co/docs/leaderboards/en/open_llm_leaderboard/archive):
+[HF LLM- V1](https://huggingface.co/docs/leaderboards/en/open_llm_leaderboard/archive) + OpenbookQA and PIQA :
 
 | Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|----------|------------------|-------------------|-------------------|-----------|
@@ -72,21 +72,22 @@ Finally, we compare with SoTA transformer models (Meta Llama 3.1 8B, IBM Granite
 | ARC-C          | 63.23    | 63.40           | 57.85             | 63.74             | **64.51** |
 | TruthfulQA     | 49.21    | **53.46**       | 45.16             | 52.89             | 43.32     |
 | GSM8K          | 36.77    | 52.08           | 49.96             | 62.55             | **68.01** |
-| **Average**    |  57.86    |   61.13       |    60.17        |    **64.69**         | 62.18     |
+| Piqa           | 82.26    | **83.62**       | 82.54             | 82.41             | 81.39     |
+| OpenbookQA     | 47.60    | 47.80           | 46.80             | 47.60             | **49.20** |
+| **Average**    |   63.93    |   66.73         |    65.06        |   **68.95**           |     67.37   |
 
-[HF LLM- V2](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/about) + OpenbookQA and PIQA (all scores are normalized):
+[HF LLM- V2](https://huggingface.co/docs/leaderboards/open_llm_leaderboard/about)** :
 
 | Benchmark score | Bamba 9B | Falcon Mamba 7B | Meta Llama 3.1 8B | IBM Granite v3 8B | Olmo2 7B |
 |-----------------|----------|------------------|-------------------|-------------------|-----------|
 | MMLU PRO       | 17.53    | 14.33           | 25.46             | **25.83**         | 22.79     |
 | BBH            | 17.40    | 19.88           | 25.16             | **28.02**         | 21.69     |
-| Piqa           | 82.26    | **83.62**       | 82.54             | 82.41             | 81.39     |
-| OpenbookQA     | 47.60    | 47.80           | 46.80             | 47.60             | **49.20** |
 | MuSR           | 9.59     | 9.88            | 8.72              | 9.32              | **10.02** |
 | GPQA           | 4.14     | 8.17            | 8.61              | **9.06**          | 4.92      |
 | MathLvl5       | 1.66     | 4.0             | 5.14              | **9.82**          | 4.38      |
-| **Average**    |   25.42   |    28.53       |      27.11      |     **32.83**       |  27.0     |  
+| **Average**    |   10.06   |    11.25       |    14.61     |   **16.41**        |   12.78   |  
 
+\** IFEVAL, an instruction following task is less relevant in this setting and thus is intentionally excluded.
 
 We invite the community to help improve the model further and identify any fundamental limitations in this inference efficient model.
 
